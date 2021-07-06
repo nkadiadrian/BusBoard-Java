@@ -9,7 +9,6 @@ import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class Main {
     public static void main(String args[]) throws IOException {
@@ -46,7 +45,10 @@ public class Main {
 
         Collections.sort(arrivals, Comparator.comparing(Arrival::getMinutesToArrival));
 
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 5 && i < arrivals.size(); i++) {
+            if (arrivals.size() == 0) {
+                System.out.println("No inbound buses found for this stop point");
+            }
             System.out.println(arrivals.get(i));
         }
     }
@@ -58,7 +60,7 @@ public class Main {
                 .path("{postcode}")
                 .resolveTemplate("postcode", postcode)
                 .request(MediaType.APPLICATION_JSON)
-                .get(Postcode.class);
+                .get().readEntity(PostcodeResult.class).result;
 
         int numberOfStops = 0;
         int radius = 0;
@@ -72,7 +74,7 @@ public class Main {
         if(numberOfStops>1){
             System.out.println("Arrivals at bus stop " + listOfBusStops.get(0).getCommonName());
             findFirstFiveBuses(listOfBusStops.get(0).getId());
-            System.out.println("Arrivals at bus stop " + listOfBusStops.get(1).getCommonName());
+            System.out.println("\nArrivals at bus stop " + listOfBusStops.get(1).getCommonName());
             findFirstFiveBuses(listOfBusStops.get(1).getId());
         } else if(numberOfStops == 1){
             System.out.println("Only one bus stop found in a radius of 50km.");
@@ -85,8 +87,8 @@ public class Main {
 
     private static List<BusStop> getBusStopsInRadius(Postcode postcodeForBusStops, int radius) {
         Client client = ClientBuilder.newBuilder().register(JacksonFeature.class).build();
+        String stopTypes = "NaptanPublicBusCoachTram";
         //String stopTypes = "CarPickupSetDownArea%2C%20NaptanAirAccessArea%2C%20NaptanAirEntrance%2C%20NaptanAirportBuilding%2C%20NaptanBusCoachStation%2C%20NaptanBusWayPoint%2C%20NaptanCoachAccessArea%2C%20NaptanCoachBay%2C%20NaptanCoachEntrance%2C%20NaptanCoachServiceCoverage%2C%20NaptanCoachVariableBay%2C%20NaptanFerryAccessArea%2C%20NaptanFerryBerth%2C%20NaptanFerryEntrance%2C%20NaptanFerryPort%2C%20NaptanFlexibleZone%2C%20NaptanHailAndRideSection%2C%20NaptanLiftCableCarAccessArea%2C%20NaptanLiftCableCarEntrance%2C%20NaptanLiftCableCarStop%2C%20NaptanLiftCableCarStopArea%2C%20NaptanMarkedPoint%2C%20NaptanMetroAccessArea%2C%20NaptanMetroEntrance%2C%20NaptanMetroPlatform%2C%20NaptanMetroStation%2C%20NaptanOnstreetBusCoachStopCluster%2C%20NaptanOnstreetBusCoachStopPair%2C%20NaptanPrivateBusCoachTram%2C%20NaptanPublicBusCoachTram%2C%20NaptanRailAccessArea%2C%20NaptanRailEntrance%2C%20NaptanRailPlatform%2C%20NaptanRailStation%2C%20NaptanSharedTaxi%2C%20NaptanTaxiRank%2C%20NaptanUnmarkedPoint%2C%20TransportInterchange";
-        String stopTypes = "CarPickupSetDownArea";
         List<BusStop> busStops = client.target("https://api.tfl.gov.uk/StopPoint")
                 .queryParam("lat", postcodeForBusStops.getLatitude())
                 .queryParam("lon", postcodeForBusStops.getLongitude())
@@ -94,7 +96,7 @@ public class Main {
                 .queryParam("radius", radius)
                 .queryParam("modes", "bus")
                 .request(MediaType.APPLICATION_JSON)
-                .get(new GenericType<List<BusStop>>() {});
+                .get(BusStopResponse.class).getStopPoints();
         return busStops;
     }
 }
