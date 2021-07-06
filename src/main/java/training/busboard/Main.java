@@ -7,12 +7,11 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
-import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class Main {
-    public static void main(String args[]) throws IOException {
+    public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         while (true) {
             System.out.println("Do you want to input bus stop code or postcode?");
@@ -44,7 +43,7 @@ public class Main {
                 .request(MediaType.APPLICATION_JSON)
                 .get(new GenericType<List<Arrival>>() {});
 
-        Collections.sort(arrivals, Comparator.comparing(Arrival::getMinutesToArrival));
+        arrivals.sort(Comparator.comparing(Arrival::getMinutesToArrival));
 
         if (arrivals.isEmpty()) {
             System.out.println("No inbound buses found for this stop point");
@@ -94,7 +93,7 @@ public class Main {
         stopTypes = Arrays.stream(stopTypes.split("%2C%20"))
                 .filter(type -> type.toUpperCase().contains("BUS"))
                 .collect(Collectors.joining(", "));
-        List<BusStop> busStops = client.target("https://api.tfl.gov.uk/StopPoint")
+        return client.target("https://api.tfl.gov.uk/StopPoint")
                 .queryParam("lat", postcodeForBusStops.getLatitude())
                 .queryParam("lon", postcodeForBusStops.getLongitude())
                 .queryParam("stopTypes", stopTypes)
@@ -102,6 +101,5 @@ public class Main {
                 .queryParam("modes", "bus")
                 .request(MediaType.APPLICATION_JSON)
                 .get(BusStopResponse.class).getStopPoints();
-        return busStops;
     }
 }
