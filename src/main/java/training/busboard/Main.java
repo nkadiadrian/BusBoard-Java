@@ -65,7 +65,7 @@ public class Main {
         int[] possibleRadii = {100,200,500,1000,2000,5000,10000,20000,50000};
         List<BusStop> listOfBusStops = new ArrayList<>();
         while(numberOfStops < 2 && radius < 9) {
-            listOfBusStops = getBusStopsInRadius(client, postcodeForBusStops, possibleRadii[radius]);
+            listOfBusStops = getBusStopsInRadius(postcodeForBusStops, possibleRadii[radius]);
             radius++;
             numberOfStops = listOfBusStops.size();
         }
@@ -83,10 +83,11 @@ public class Main {
         }
     }
 
-    private static List<BusStop> getBusStopsInRadius(Client client, Postcode postcodeForBusStops, int radius) {
+    private static List<BusStop> getBusStopsInRadius(Postcode postcodeForBusStops, int radius) {
+        Client client = ClientBuilder.newBuilder().register(JacksonFeature.class).build();
         //String stopTypes = "CarPickupSetDownArea%2C%20NaptanAirAccessArea%2C%20NaptanAirEntrance%2C%20NaptanAirportBuilding%2C%20NaptanBusCoachStation%2C%20NaptanBusWayPoint%2C%20NaptanCoachAccessArea%2C%20NaptanCoachBay%2C%20NaptanCoachEntrance%2C%20NaptanCoachServiceCoverage%2C%20NaptanCoachVariableBay%2C%20NaptanFerryAccessArea%2C%20NaptanFerryBerth%2C%20NaptanFerryEntrance%2C%20NaptanFerryPort%2C%20NaptanFlexibleZone%2C%20NaptanHailAndRideSection%2C%20NaptanLiftCableCarAccessArea%2C%20NaptanLiftCableCarEntrance%2C%20NaptanLiftCableCarStop%2C%20NaptanLiftCableCarStopArea%2C%20NaptanMarkedPoint%2C%20NaptanMetroAccessArea%2C%20NaptanMetroEntrance%2C%20NaptanMetroPlatform%2C%20NaptanMetroStation%2C%20NaptanOnstreetBusCoachStopCluster%2C%20NaptanOnstreetBusCoachStopPair%2C%20NaptanPrivateBusCoachTram%2C%20NaptanPublicBusCoachTram%2C%20NaptanRailAccessArea%2C%20NaptanRailEntrance%2C%20NaptanRailPlatform%2C%20NaptanRailStation%2C%20NaptanSharedTaxi%2C%20NaptanTaxiRank%2C%20NaptanUnmarkedPoint%2C%20TransportInterchange";
         String stopTypes = "CarPickupSetDownArea";
-        List<BusStop> busStops = client.target("https://api.tfl.gov.uk/StopPoint/")
+        List<BusStop> busStops = client.target("https://api.tfl.gov.uk/StopPoint")
                 .queryParam("lat", postcodeForBusStops.getLatitude())
                 .queryParam("lon", postcodeForBusStops.getLongitude())
                 .queryParam("stopTypes", stopTypes)
