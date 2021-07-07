@@ -84,9 +84,9 @@ public class BusClient {
                 .get(BusStopResponse.class).getStopPoints();
     }
 
-    private static String getFirstFiveBuses(String id) {
+    private static List<String> getFirstFiveBuses(String id) {
         Client client = ClientBuilder.newBuilder().register(JacksonFeature.class).build();
-        StringBuilder output = new StringBuilder();
+        List<String> output = new ArrayList<>();
 
         List<Arrival> arrivals = client.target("https://api.tfl.gov.uk/")
                 .path("StopPoint/{id}/arrivals")
@@ -96,21 +96,20 @@ public class BusClient {
 
         arrivals.sort(Comparator.comparing(Arrival::getMinutesToArrival));
 
-
         if (arrivals.isEmpty()) {
-            output.append("No inbound buses found for this stop point\n");
+            output.add("No inbound buses found for this stop point\n");
         }
 
         for (int i = 0; i < 5 && i < arrivals.size(); i++) {
-            output.append(arrivals.get(i) + "\n");
+            output.add(arrivals.get(i) + "\n");
         }
 
-        return output.toString();
+        return output;
     }
 
-    public static String getTwoClosestStops(String postcode) {
+    public static List<String> getTwoClosestStops(String postcode) {
         Client client = ClientBuilder.newBuilder().register(JacksonFeature.class).build();
-        StringBuilder output = new StringBuilder();
+        List<String> output = new ArrayList<>();
 
         Postcode postcodeForBusStops = client.target("https://api.postcodes.io/postcodes/")
                 .path("{postcode}")
@@ -129,18 +128,18 @@ public class BusClient {
         }
 
         if(numberOfStops>1){
-            output.append("Arrivals at bus stop " + listOfBusStops.get(0).getCommonName() + "\n");
-            output.append(getFirstFiveBuses(listOfBusStops.get(0).getId()));
-            output.append("\nArrivals at bus stop " + listOfBusStops.get(1).getCommonName() + "\n");
-            output.append(getFirstFiveBuses(listOfBusStops.get(1).getId()));
+            output.add("Arrivals at bus stop " + listOfBusStops.get(0).getCommonName() + "\n");
+            output.addAll(getFirstFiveBuses(listOfBusStops.get(0).getId()));
+            output.add("\nArrivals at bus stop " + listOfBusStops.get(1).getCommonName() + "\n");
+            output.addAll(getFirstFiveBuses(listOfBusStops.get(1).getId()));
         } else if(numberOfStops == 1){
-            output.append("Only one bus stop found in a radius of 50km.");
-            output.append("\nArrivals at bus stop " + listOfBusStops.get(0).getCommonName() + "\n");
-            output.append(getFirstFiveBuses(listOfBusStops.get(0).getId()));
+            output.add("Only one bus stop found in a radius of 50km.");
+            output.add("\nArrivals at bus stop " + listOfBusStops.get(0).getCommonName() + "\n");
+            output.addAll(getFirstFiveBuses(listOfBusStops.get(0).getId()));
         } else {
-            output.append("No bus stops found in a radius of 50km.");
+            output.add("No bus stops found in a radius of 50km.");
         }
 
-        return output.toString();
+        return output;
     }
 }

@@ -6,13 +6,17 @@
     <!--@thymesVar id="busInfo" type="training.busboard.web.BusInfo"-->
 
     <head>
-        <title>Bus Information Title</title>
+        <title>Bus Information</title>
+        <meta http-equiv="refresh" content="30">
     </head>
     <body>
         <div layout:fragment="content" class="container body-content">
-            <h2>Bus Information Header</h2>
+            <h2>Bus Information</h2>
             <div>
-                <p>You entered postcode <span th:text="${busInfo.arrivalsAtTwoClosestStops}"></span></p>
+                <p>You entered postcode <span th:text="${busInfo.getPostcode()}"></span></p>
+                <ul th:each="line : ${busInfo.arrivalsAtTwoClosestStops}" style="list-style-type: none;">
+                    <li><span th:text="${line}"></span></li>
+                </ul>
             </div>
         </div>
     </body>

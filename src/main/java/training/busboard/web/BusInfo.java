@@ -2,16 +2,19 @@ package training.busboard.web;
 
 import training.busboard.BusClient;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class BusInfo {
     private final String postcode;
-    private String arrivalsAtTwoClosestStops;
+    private List<String> arrivalsAtTwoClosestStops = new ArrayList<>();
 
     public BusInfo(String postcode) {
         this.postcode = postcode;
         this.arrivalsAtTwoClosestStops = BusClient.getTwoClosestStops(postcode);
     }
 
-    public String getArrivalsAtTwoClosestStops() {
+    public List<String> getArrivalsAtTwoClosestStops() {
         return arrivalsAtTwoClosestStops;
     }
 
